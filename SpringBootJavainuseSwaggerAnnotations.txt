@@ -1,0 +1,151 @@
+SpringBootJavainuseSwaggerAnnotations
+
+SpringBootJavainuseSwagger2Helloworld(Spring Boot + Swagger2) is the input to this
+
+If the user has default response messages which are to be applied to all the REST APIs then these can be specified when defining the Docket bean. Hence these will not need to be applied at the method level. For example if the response for code 404 and 500 is going to be same through out all services, then in SwaggerConfig add the below
+
+docket.globalResponseMessage(RequestMethod.GET, ImmutableList.of(new ResponseMessageBuilder()
+         .code(400)
+         .message("Bad Request")
+         .responseModel(new ModelRef("Error")).build(),new ResponseMessageBuilder()
+         .code(500)
+         .message("Internal Server Error")
+         .responseModel(new ModelRef("Error")).build()));
+		 
+		 
+		 
+Spring Boot + Swagger2- Understanding various Swagger annotations-
+In previous post we configured a spring boot application to integrate swagger2. Various Swagger annotations are available to help document the REST APIs. Lets take a look at these. We will add these annotations to the sayHello() method we defined in the previous post.
+@ApiOperation-
+
+This annotation is used to describe the exposed REST API. It describes an operation or typically a HTTP method against a specific path. It takes the following parameters-
+Annotation Parameter	Description
+value	The value of the annotation is a short description on the API. Since this is displayed in the list of operations in Swagger-UI and the location is limited in size, this should be kept short (preferably shorter than 120 characters)
+notes	The notes allows you to give significantly more details about the operations (e.g. you can include request samples and responses here)
+nickname	The nickname for this API.
+The code will be as follows for the hello method-
+	@ApiOperation(value = "getGreeting", notes="get greeting",nickname = "getGreeting")
+	@RequestMapping(method = RequestMethod.GET, value = "/api/javainuse")
+	public <Hello> sayHello() {
+		ArrayList<Hello> arrayList= new ArrayList<>();
+			arrayList.add(new Hello());
+		return arrayList;
+	}
+	
+
+ 
+@ApiResponses-
+
+This annotation is used to describe the expected responses for the REST API. The @ApiResponse describes a concrete possible response. It cannot be used directly on the method and needs to be included in the array value of @ApiResponses (whether there's one response or more). It takes the following parameters-
+Annotation Parameter	Description
+ApiResponse	The @ApiResponse describes a concrete possible response
+The code will be as follows for the hello method-
+	@ApiOperation(value = "getGreeting", nickname = "getGreeting")
+	 @ApiResponses(value = {
+		        @ApiResponse(code = 500, message = "Server error"),
+		         @ApiResponse(code = 404, message = "Service not found"),
+		        @ApiResponse(code = 200, message = "Successful retrieval",
+		            response = Hello.class, responseContainer = "List") })
+	@RequestMapping(method = RequestMethod.GET, value = "/api/javainuse")
+	public <Hello> sayHello() {
+			ArrayList<Hello> arrayList= new ArrayList<>();
+			arrayList.add(new Hello());
+		return arrayList;
+	}
+	
+If the user has default response messages which are to be applied to all the REST APIs then these can be specified when defining the Docket bean. Hence these will not need to be applied at the method level. For example if the response for code 404 and 500 is going to be same through out all services
+	@Bean
+	public Docket postsApi() {
+	Docket docket=new Docket(DocumentationType.SWAGGER_2);
+		
+		 docket.groupName("public-api")
+				.apiInfo(apiInfo()).select().paths(postPaths()).build();
+		 
+		 
+		 docket.globalResponseMessage(RequestMethod.GET, ImmutableList.of(new ResponseMessageBuilder()
+         .code(400)
+         .message("Bad Request")
+         .responseModel(new ModelRef("Error")).build(),new ResponseMessageBuilder()
+         .code(500)
+         .message("Internal Server Error")
+         .responseModel(new ModelRef("Error")).build()));
+         
+          return docket;
+	
+
+ 
+@ApiParam-
+
+This annotation is used to describe the exposed REST API. It takes the following parameters-
+Annotation Parameter	Description
+value	The value is a short description of the parameter
+required	If the parameter is optional or required.
+defaultValue	Specify defaultValue of the parameter.
+The code will be as follows for the hello method-
+	@ApiOperation(value = "getGreeting", nickname = "getGreeting")
+	 @ApiResponses(value = {
+		        @ApiResponse(code = 500, message = "Server error"),
+		        @ApiResponse(code = 200, message = "Successful retrieval",
+		            response = Hello.class, responseContainer = "List") })
+	@RequestMapping(method = RequestMethod.GET, value = "/api/javainuse")
+	public List<Hello> sayHello(@ApiParam(value = "testId",
+	        required = true, defaultValue = "111")  @PathVariable(ID) final int institutuionId) {
+		return new Hello();
+	}
+	
+We get the Swagger UI as-
+
+Understanding the Annotations for the model class-
+
+The sayHello() method above is returning a list of Hello class. We can use annotations to define a default response that we expect-
+@ApiModel-
+
+The @ApiModel allows you to manipulate the meta data of a model from a simple description or name change to a definition of polymorphism. We have used it to create a response class Hello with default values. It takes the following parameters-
+Annotation Parameter	Description
+value	The name displayed for the Model class
+description	The description of the model class
+
+ 
+@ApiModelProperty-
+
+The @ApiModelProperty allows controlling Swagger-specific definitions such as allowed values, and additional notes. It also offers additional filtering properties in case you want to hide the property in certain scenarios. We use this parameter for specifying default values to the Response model class Hello. It takes the following parameters-
+Annotation Parameter	Description
+position	The position of the field in the reponse class during display using swagger.
+value	The value of the field when using Swagger. For example the default value of the path varaible will be 111 for class Hello.
+required	If the field is optional or required.
+package com.javainuse.swaggertest;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+
+@ApiModel
+public class Hello {
+	
+	private int helloId;
+	private String test;
+
+    @ApiModelProperty(position = 1, required = true, value = "1")
+	public int getHelloId() {
+		return helloId;
+	}
+
+	public void setHelloId(int helloId) {
+		this.helloId = helloId;
+	}
+
+    @ApiModelProperty(position = 2, required = true, value = "helloTest")
+	public String getTest() {
+		return test;
+	}
+
+	public void setTest(String test) {
+		this.test = test;
+	}
+}
+	
+Download Source Code
+Download it -
+Spring Boot + Swagger Annotations example
+		 
+
+
